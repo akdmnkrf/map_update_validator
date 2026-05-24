@@ -3,6 +3,13 @@
 from __future__ import annotations
 
 import datetime as dt
+import sys
+from pathlib import Path
+
+# Streamlit Cloud: ensure repo root is on sys.path
+_APP_ROOT = Path(__file__).resolve().parent
+if str(_APP_ROOT) not in sys.path:
+    sys.path.insert(0, str(_APP_ROOT))
 
 import pandas as pd
 import pydeck as pdk
@@ -12,8 +19,7 @@ import streamlit as st
 from map_validator import __version__
 from map_validator.analysis.analyzer import CityAnalyzer
 from map_validator.constants import DEFAULT_CITIES, DEFAULT_HIGHWAYS, HIGHWAY_TYPES, TURKISH_CITIES
-from map_validator.config import OVERPASS_ENDPOINTS
-from map_validator.services.overpass import OverpassClient, build_overpass_query
+from map_validator.services.overpass import OVERPASS_ENDPOINTS, OverpassClient, build_overpass_query
 
 METRIC_HELP = """
 - **changed_ways** — Seçilen aralıkta değişiklik kaydı olan yol sayısı
@@ -127,13 +133,6 @@ def main() -> None:
                 )
             except requests.RequestException as exc:
                 st.error(f"Analiz hatası ({city}): {exc}")
-                if "overpass-api.de" in str(exc):
-                    st.warning(
-                        "Hata mesajında `overpass-api.de` görünüyorsa güncel kod çalışmıyor demektir. "
-                        f"Beklenen sürüm: **{__version__}**. `git pull origin main` yapın, "
-                        "`find . -name __pycache__ -exec rm -rf {} +` ile önbelleği silin ve "
-                        "Streamlit sürecini tamamen yeniden başlatın (Streamlit Cloud: **Reboot app**)."
-                    )
                 continue
 
             if result is None:

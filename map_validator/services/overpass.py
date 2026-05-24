@@ -5,11 +5,16 @@ from typing import Any
 
 import requests
 
-from map_validator.config import (
-    OVERPASS_ENDPOINTS,
-    OVERPASS_TIMEOUT_SEC,
-    USER_AGENT,
-)
+from map_validator.config import OVERPASS_TIMEOUT_SEC, USER_AGENT
+
+# Import mirrors with fallback so partial deploys on Streamlit Cloud still boot.
+try:
+    from map_validator.config import OVERPASS_ENDPOINTS
+except ImportError:
+    OVERPASS_ENDPOINTS = (
+        "https://overpass.kumi.systems/api/interpreter",
+        "https://overpass.private.coffee/api/interpreter",
+    )
 
 
 def build_overpass_query(city_name: str, start_dt: dt.date, highway_types: list[str]) -> str:

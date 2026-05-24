@@ -12,6 +12,7 @@ import streamlit as st
 from map_validator import __version__
 from map_validator.analysis.analyzer import CityAnalyzer
 from map_validator.constants import DEFAULT_CITIES, DEFAULT_HIGHWAYS, HIGHWAY_TYPES, TURKISH_CITIES
+from map_validator.config import OVERPASS_ENDPOINTS
 from map_validator.services.overpass import OverpassClient, build_overpass_query
 
 METRIC_HELP = """
@@ -92,6 +93,11 @@ def main() -> None:
     st.caption(
         "Overpass değişimleri · OSRM mesafe ölçümü · ETA etki oranı · tag kırılımı · harita"
     )
+    with st.expander("Sürüm ve bağlantı bilgisi", expanded=False):
+        st.write(f"**Sürüm:** {__version__}")
+        st.write("**Overpass sunucuları (sırayla denenir):**")
+        for endpoint in OVERPASS_ENDPOINTS:
+            st.code(endpoint)
 
     start_date, end_date, selected_highways, selected_cities, show_raw_json, run = _render_sidebar_inputs()
 
@@ -121,6 +127,13 @@ def main() -> None:
                 )
             except requests.RequestException as exc:
                 st.error(f"Analiz hatası ({city}): {exc}")
+                if "overpass-api.de" in str(exc):
+                    st.warning(
+                        "Hata mesajında `overpass-api.de` görünüyorsa güncel kod çalışmıyor demektir. "
+                        f"Beklenen sürüm: **{__version__}**. `git pull origin main` yapın, "
+                        "`find . -name __pycache__ -exec rm -rf {} +` ile önbelleği silin ve "
+                        "Streamlit sürecini tamamen yeniden başlatın (Streamlit Cloud: **Reboot app**)."
+                    )
                 continue
 
             if result is None:

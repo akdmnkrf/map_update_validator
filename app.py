@@ -131,6 +131,16 @@ def main() -> None:
                     selected_highways,
                     overpass_data=overpass_data,
                 )
+            except requests.HTTPError as exc:
+                msg = str(exc)
+                st.error(f"Analiz hatası ({city}): {msg}")
+                if "429" in msg:
+                    st.info(
+                        "Bu bir rate-limit hatasıdır. Overpass sunucuları kısa süre yoğun. "
+                        "2–5 dakika bekleyip **Analyze** ile tekrar deneyin. "
+                        "İstanbul gibi büyük illerde kısa tarih aralığı ve az yol türü seçmek de yardımcı olur."
+                    )
+                continue
             except requests.RequestException as exc:
                 st.error(f"Analiz hatası ({city}): {exc}")
                 continue
@@ -142,7 +152,10 @@ def main() -> None:
             all_points.extend((point.lat, point.lon) for point in result.map_points)
 
     if not results:
-        st.error("Veri alınamadı. Tarih aralığını, illeri veya yol türlerini değiştirin.")
+        st.error(
+            "Veri alınamadı. Rate-limit (429) görüyorsanız birkaç dakika bekleyin; "
+            "aksi halde tarih aralığını, illeri veya yol türlerini daraltın."
+        )
         return
 
     df = pd.DataFrame([row.to_row() for row in results]).sort_values(

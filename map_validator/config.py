@@ -1,8 +1,9 @@
 # Public Overpass mirrors (tried in order).
-# overpass-api.de often returns HTTP 406 from cloud/datacenter IPs — not used.
+# Public instances rate-limit heavily (HTTP 429); client retries with backoff.
 OVERPASS_ENDPOINTS = (
     "https://overpass.kumi.systems/api/interpreter",
     "https://overpass.private.coffee/api/interpreter",
+    "https://overpass-api.de/api/interpreter",
 )
 
 # Backward compatibility for older deployments / imports.
@@ -14,4 +15,8 @@ OVERPASS_TIMEOUT_SEC = 180
 OSRM_TIMEOUT_SEC = 10
 OSRM_MAX_WORKERS = 8
 
-USER_AGENT = "MapUpdateValidator/2.2.2 (https://github.com/akdmnkrf/map_update_validator)"
+# Retry policy for busy public Overpass servers
+OVERPASS_MAX_RETRIES = 3
+OVERPASS_RETRY_BACKOFF_SEC = 2.0
+
+USER_AGENT = "MapUpdateValidator/2.2.3 (https://github.com/akdmnkrf/map_update_validator)"
